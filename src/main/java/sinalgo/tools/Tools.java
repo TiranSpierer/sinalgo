@@ -57,6 +57,7 @@ import sinalgo.runtime.nodeCollection.AbstractNodeCollection;
 import sinalgo.runtime.packetsInTheAir.PacketsInTheAirBuffer;
 import sinalgo.tools.logging.Logging;
 import sinalgo.tools.statistics.Distribution;
+import sinalgo.web.WebDialogManager;
 
 import javax.swing.*;
 import java.io.PrintStream;
@@ -596,7 +597,11 @@ public class Tools {
      * @param infoText Text to display.
      */
     public static void showMessageDialog(String infoText) {
-        JOptionPane.showMessageDialog(null, infoText);
+        if (Global.isWebMode()) {
+            WebDialogManager.showMessage(infoText);
+        } else {
+            JOptionPane.showMessageDialog(null, infoText);
+        }
     }
 
     /**
@@ -606,6 +611,9 @@ public class Tools {
      * @return The text entered by the user, null if the user canceled the process.
      */
     public static String showQueryDialog(String queryText) {
+        if (Global.isWebMode()) {
+            return WebDialogManager.showQuery(queryText);
+        }
         return JOptionPane.showInputDialog(null, queryText);
     }
 
@@ -633,6 +641,10 @@ public class Tools {
      * @param text    Text to display to the user
      */
     public static void getNodeSelectedByUser(NodeSelectionHandler handler, String text) {
+        if (Global.isWebMode()) {
+            WebDialogManager.requestNodeSelection(handler, text);
+            return;
+        }
         try {
             Main.getGuiRuntime().getGUI().getGraphPanel().getNodeSelectedByUser(handler, text);
         } catch (NotInGUIModeException e) {
@@ -698,6 +710,18 @@ public class Tools {
      * @param text The text to append.
      */
     public static void appendToOutput(String text) {
+        if (Global.isWebMode()) {
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper m = new com.fasterxml.jackson.databind.ObjectMapper();
+                com.fasterxml.jackson.databind.node.ObjectNode msg = m.createObjectNode();
+                msg.put("type", "log_append");
+                msg.put("text", text);
+                sinalgo.runtime.WebRuntime.broadcast(msg.toString());
+            } catch (Exception e) {
+                // ignore
+            }
+            return;
+        }
         if (!Global.isGuiMode()) {
             return;
         }
@@ -970,23 +994,29 @@ public class Tools {
      * Parse whether in to start the framework in GUI or batch mode.
      *
      * @param args The Command Line arguments
-     * @return 0 = not seen (defaults to GUI), 1 = GUI, 2 = batch
+     * @return 0 = not seen (defaults to GUI), 1 = GUI, 2 = batch, 3 = web
      */
     public static int parseGuiBatch(String[] args) {
         int guiBatch = 0;
         for (String s : args) {
             if (s.toLowerCase().equals("-batch")) {
-                if (guiBatch == 1) { // conflict
-                    throw new SinalgoFatalException("You may only specify the '-gui' xor the '-batch' flag.");
+                if (guiBatch != 0) {
+                    throw new SinalgoFatalException("You may only specify one of '-gui', '-batch', or '-web'.");
                 }
                 guiBatch = 2;
                 Global.setGuiMode(false);
             } else if (s.toLowerCase().equals("-gui")) {
-                if (guiBatch == 2) { // conflict
-                    throw new SinalgoFatalException("You may only specify the '-gui' xor the '-batch' flag.");
+                if (guiBatch != 0) {
+                    throw new SinalgoFatalException("You may only specify one of '-gui', '-batch', or '-web'.");
                 }
                 guiBatch = 1;
                 Global.setGuiMode(true);
+            } else if (s.toLowerCase().equals("-web")) {
+                if (guiBatch != 0) {
+                    throw new SinalgoFatalException("You may only specify one of '-gui', '-batch', or '-web'.");
+                }
+                guiBatch = 3;
+                Global.setGuiMode(false);
             }
         }
         return guiBatch;

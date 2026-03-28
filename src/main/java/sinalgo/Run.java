@@ -144,8 +144,21 @@ public class Run {
                 cmds.add("-project");
                 cmds.add(projectName);
             }
-            // add the given cmd-line args
-            cmds.addAll(Arrays.asList(args));
+            // add the given cmd-line args, skipping -project (already added above) and -web (added below)
+            for (int i = 0; i < args.length; i++) {
+                if (args[i].equalsIgnoreCase("-project") && i + 1 < args.length) {
+                    i++; // skip -project and its value
+                } else if (args[i].equalsIgnoreCase("-web")) {
+                    // skip, handled via system property below
+                } else {
+                    cmds.add(args[i]);
+                }
+            }
+
+            // Pass web mode flag to child process if set via system property
+            if ("true".equals(System.getProperty("sinalgo.webMode"))) {
+                cmds.add("-web");
+            }
 
             // reassemble the entire command for error-messages
             for (String s : cmds) {
@@ -227,6 +240,12 @@ public class Run {
 
         int guiBatch = Tools.parseGuiBatch(args);
 
+        // Also check for JVM system property (set by Gradle run -PwebMode)
+        if (guiBatch == 0 && "true".equals(System.getProperty("sinalgo.webMode"))) {
+            guiBatch = 3;
+            Global.setGuiMode(false);
+        }
+
         Tools.parseProject(args);
 
         // start the project selector GUI if no project was selected.
@@ -234,6 +253,10 @@ public class Run {
             if (guiBatch == 2) { // in batch mode
                 throw new SinalgoFatalException(
                         "Missing project: In batch mode, you need to specify a project on the command line using the -project flag.");
+            }
+            if (guiBatch == 3) { // in web mode
+                throw new SinalgoFatalException(
+                        "Missing project: In web mode, you need to specify a project on the command line using the -project flag.");
             }
 
             Global.setGuiMode(true);

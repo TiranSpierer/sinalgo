@@ -34,3 +34,8 @@ gradle-app.setting
 # Local project-scoped JDK and Gradle home (see run.sh)
 .local-jdk/
 .gradle-home/
+
+# Web frontend
+web/node_modules/
+web/dist/
+src/main/resources/web/

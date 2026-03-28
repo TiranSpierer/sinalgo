@@ -317,11 +317,12 @@ public abstract class SinalgoRuntime {
                 }
 
                 i--; // point to last processed entry, for-loop increments i afterwards
-            } else if (!Arrays.asList("-project", "-gui", "-batch", "-overwrite").contains(args[i])
+            } else if (!Arrays.asList("-project", "-gui", "-batch", "-web", "-overwrite").contains(args[i])
                     && args[i].startsWith("-")) {
                 // omitting -project as is was already used in the main class.
                 // omitting -gui as is was already used in the main class.
                 // omitting -batch as is was already used in the main class.
+                // omitting -web as is was already used in the main class.
                 // omitting -overwrite as is was already used in the main class.
                 throw new SinalgoFatalException("Unknown modifier " + args[i]);
             }

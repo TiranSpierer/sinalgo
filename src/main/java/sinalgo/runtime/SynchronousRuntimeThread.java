@@ -98,6 +98,11 @@ public class SynchronousRuntimeThread extends Thread {
                 this.getRuntime().setAbort(false);
                 break;
             }
+            // In web mode, check the static abort flag
+            if (Global.isWebMode() && WebRuntime.isAbortRequested()) {
+                WebRuntime.clearAbort();
+                break;
+            }
 
             // INCREMENT THE GLOBAL TIME by 1
             Global.setCurrentTime(Global.getCurrentTime() + 1);
@@ -152,6 +157,10 @@ public class SynchronousRuntimeThread extends Thread {
                     }
                 }
                 this.getRuntime().getGUI().setRoundsPerformed((int) (Global.getCurrentTime()));
+            } else if (Global.isWebMode()) {
+                if ((i % this.getRefreshRate()) == (this.getRefreshRate() - 1)) {
+                    WebRuntime.pushStateIfActive();
+                }
             }
 
             // test whether the application should exit
@@ -160,6 +169,10 @@ public class SynchronousRuntimeThread extends Thread {
                     this.getRuntime().getGUI().redrawGUINow();
                     this.getRuntime().getGUI().setStartButtonEnabled(true);
 
+                    Global.setRunning(false);
+                    return;
+                }
+                if (Global.isWebMode()) {
                     Global.setRunning(false);
                     return;
                 }
@@ -186,6 +199,8 @@ public class SynchronousRuntimeThread extends Thread {
         if (Global.isGuiMode()) {
             this.getRuntime().getGUI().redrawGUINow();
             this.getRuntime().getGUI().setStartButtonEnabled(true);
+        } else if (Global.isWebMode()) {
+            WebRuntime.pushStateIfActive();
         } else { // we reached the end of a synchronous simulation in batch mode
             if (LogL.HINTS) {
                 Date tem = new Date();
@@ -194,7 +209,9 @@ public class SynchronousRuntimeThread extends Thread {
                         "Simulation stopped regularly after " + Global.getCurrentTime() + " rounds during " + time + " ms");
                 Global.getLog().logln("Which makes " + (time / Global.getCurrentTime()) + " ms per round.\n");
             }
-            Main.exitApplication(); // exit explicitely, s.t. CustomGlobal.onExit() is called
+            if (!Global.isWebMode()) {
+                Main.exitApplication(); // exit explicitely, s.t. CustomGlobal.onExit() is called
+            }
         }
         Global.setRunning(false);
     }

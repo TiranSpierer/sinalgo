@@ -312,6 +312,13 @@ public class Global {
     private static boolean isGuiMode;
 
     /**
+     * True if started in web mode (embedded HTTP server), otherwise false.
+     */
+    @Getter
+    @Setter
+    private static boolean isWebMode;
+
+    /**
      * True if runing in asynchronousMode, false otherwise.
      */
     @Getter

@@ -124,6 +124,11 @@ public class AsynchronousRuntimeThread extends Thread {
                 this.getRuntime().setAbort(false);
                 break;
             }
+            // In web mode, check the static abort flag
+            if (Global.isWebMode() && WebRuntime.isAbortRequested()) {
+                WebRuntime.clearAbort();
+                break;
+            }
             if (event != null) {
                 event.free(); // free the previous event
             }
@@ -137,7 +142,7 @@ public class AsynchronousRuntimeThread extends Thread {
             if (event == null) {
                 Global.getLog().logln(LogL.EVENT_QUEUE_DETAILS,
                         "There is no event to be executed. Generate an event manually.");
-                if (!Global.isGuiMode()) {
+                if (!Global.isGuiMode() && !Global.isWebMode()) {
                     Main.exitApplication(); // we're in batch mode and there are no more events -> exit
                 }
             }
@@ -163,6 +168,10 @@ public class AsynchronousRuntimeThread extends Thread {
                     this.getRuntime().getGUI().setCurrentlyProcessedEvent(event); // does not store the event
                     this.getRuntime().getGUI().redrawGUINow();
                 }
+            } else if (Global.isWebMode()) {
+                if (i % this.refreshRate == this.refreshRate - 1 && i + 1 < this.numberOfEvents) {
+                    WebRuntime.pushStateIfActive();
+                }
             }
         }
 
@@ -186,9 +195,13 @@ public class AsynchronousRuntimeThread extends Thread {
             }
             this.getRuntime().getGUI().redrawGUINow();
             this.getRuntime().getGUI().setStartButtonEnabled(true);
+        } else if (Global.isWebMode()) {
+            WebRuntime.pushStateIfActive();
         } else { // Batch mode
             // we're in batch mode and the required number of events have been handled -> exit
-            Main.exitApplication();
+            if (!Global.isWebMode()) {
+                Main.exitApplication();
+            }
         }
         if (event != null) {
             event.free();

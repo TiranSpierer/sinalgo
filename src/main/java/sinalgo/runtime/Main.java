@@ -97,6 +97,12 @@ public class Main {
 
         int guiBatch = Tools.parseGuiBatch(args);
 
+        // Also check for JVM system property (set by Gradle run -PwebMode)
+        if (guiBatch == 0 && "true".equals(System.getProperty("sinalgo.webMode"))) {
+            guiBatch = 3;
+            Global.setGuiMode(false);
+        }
+
         Tools.parseProject(args);
 
         if (!Global.isUseProject()) {
@@ -131,7 +137,12 @@ public class Main {
         Global.setAsynchronousMode(Configuration.isAsynchronousMode());
 
         // initialize the chosen runtime system
-        if (guiBatch <= 1) { // GUI MODE
+        if (guiBatch == 3) { // WEB MODE
+            Global.setWebMode(true);
+            Global.getLog().logln(LogL.ALWAYS, "> Starting " + Configuration.getAppName() + " in WEB-Mode"
+                    + (Global.isUseProject() ? " for project " + Global.getProjectName() + "." : "."));
+            setRuntime(new WebRuntime());
+        } else if (guiBatch <= 1) { // GUI MODE
             Global.setGuiMode(true);
             Global.getLog().logln(LogL.ALWAYS, "> Starting " + Configuration.getAppName() + " in GUI-Mode"
                     + (Global.isUseProject() ? " for project " + Global.getProjectName() + "." : "."));
@@ -471,11 +482,13 @@ public class Main {
     }
 
     private static void usage(PrintStream ps) {
-        ps.println("Usage: {-help|-project|-gui|-batch|-gen|-refreshRate|-rounds|-overwrite}*\n"
+        ps.println("Usage: {-help|-project|-gui|-batch|-web|-gen|-refreshRate|-rounds|-overwrite}*\n"
                 + "\n-help   Prints this help\n" + "\n-project name\n"
                 + "        Initializes the simulation with the project 'name'\n"
                 + "\n-gui    Runs the simulation in GUI-mode (default)\n"
-                + "\n-batch  Runs the simulation in batch-mode\n" + "\n-gen #n T D {(params)} {CIMR {(params)}}*\n"
+                + "\n-batch  Runs the simulation in batch-mode\n"
+                + "\n-web    Runs the simulation with a web-based UI on http://localhost:8765\n"
+                + "\n-gen #n T D {(params)} {CIMR {(params)}}*\n"
                 + "        Generates an initial node placement with\n" + "        #n the number of nodes\n"
                 + "        T  the node type\n" + "        D  the distribution model\n"
                 + "        CIMR is one of the 4 following models for the node:\n"
