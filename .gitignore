@@ -30,3 +30,7 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+# Local project-scoped JDK and Gradle home (see run.sh)
+.local-jdk/
+.gradle-home/

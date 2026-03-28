@@ -1,14 +1,44 @@
-<img src="icon/sinalgo_512.png" width="100" height="100" align="right"/> 
+<img src="icon/sinalgo_512.png" width="100" height="100" align="right"/>
 
 # Sinalgo - Simulator for Network Algorithms
 
-## Welcome to Sinalgo
+## Quick Start
 
-Sinalgo is a simulation framework for testing and validating network algorithms. 
-Unlike most other network simulators, which spend most time simulating the different 
-layers of the network stack, Sinalgo focuses on the verification of network algorithms, 
-and abstracts from the underlying layers: It offers a message passing view of the network, 
-which captures well the view of actual network devices. Sinalgo was designed, but is not 
+Everything stays inside the project folder — delete the folder and it's all gone.
+
+```bash
+./run.sh run          # launches the simulator GUI (first run downloads ~500MB of dependencies)
+```
+
+On first run, `run.sh` downloads a local JDK 11 into `.local-jdk/` and keeps all Gradle
+caches in `.gradle-home/`. Nothing is installed globally — delete the folder and it's all gone.
+
+**Requirements:** `curl` and `tar` (pre-installed on macOS and most Linux distros).
+
+<details>
+<summary>More commands</summary>
+
+```bash
+# Skip the project picker and jump straight into a specific sample project
+./run.sh run -PappArgs="['-project', 'sample2']"
+
+# Compile everything into a standalone jar you can share
+./run.sh build
+
+# Generate HTML documentation for the codebase
+./run.sh javadoc
+```
+
+</details>
+
+<details>
+<summary>About Sinalgo</summary>
+
+Sinalgo is a simulation framework for testing and validating network algorithms.
+Unlike most other network simulators, which spend most time simulating the different
+layers of the network stack, Sinalgo focuses on the verification of network algorithms,
+and abstracts from the underlying layers: It offers a message passing view of the network,
+which captures well the view of actual network devices. Sinalgo was designed, but is not
 limited to simulate wireless networks.
 
 The key to successful development of network algorithms is a comprehensive test suite. Thanks to the
@@ -33,6 +63,14 @@ Some of the key features of Sinalgo:
 * Platform independent - the project is written in Java
 * Sinalgo is for free, published under a BSD license
 
+DISCLAIMER:
+Sinalgo was originally developed by the [DCG (Distributed Computing Group)](https://disco.ethz.ch/) at [ETHzürich](https://www.ethz.ch/).
+
+</details>
+
+<details>
+<summary>Models</summary>
+
 To guarantee easy extensibility, Sinalgo offers a set of extension points, the so called models. The
 following list gives an overview of the available models, to each of which you may add your own
 extension. To facilitate your life, Sinalgo ships with a set of frequently used models.
@@ -51,51 +89,14 @@ message whether it should arrive or not. E.g. drop one percent of all messages.
 * Last but not least, the transmission model lets you define how long a message takes until it
 arrives at its destination.
 
-DISCLAIMER:
-Sinalgo was originally developed by the [DCG (Distributed Computing Group)](https://disco.ethz.ch/) at [ETHzürich](https://www.ethz.ch/).
+</details>
 
-## Installation and usage
+<details>
+<summary>Tutorial</summary>
 
-Sinalgo has been ported to use the Gradle build system beginning with version 0.77. It uses a Gradle Wrapper so 
-users don't have to download the specific Gradle version that's compatible with Sinalgo. Running and building 
-Sinalgo is as simple as running:
-
-```
-./gradlew run 
-```
-
-If you need to pass command line arguments, you can use the following syntax:
-
-```
-./gradlew run -PappArgs="['arg1', 'arg2', 'arg3']"
-```
-
-And so on. As an example, the following command will run the sample2 project straight from the command line, 
-skipping the project selector window.
-
-```
-./gradlew run -PappArgs="['-project', 'sample2']"
-```
-
-When using Windows, replace ```./gradlew``` with ```gradlew.bat```.
-
-That will downloaded whichever Gradle version Sinalgo needs, build the application and run it. That includes 
-all projects.
-
-Gradle includes a ton of functionality. Some plugins being used here provide some nice resources not provided
-by Gradle by default.
-
-Right now, the following commands might be useful:
-
-* ```./gradlew build``` will build a zip for distribution plus a jar with every dependency needed to run Sinalgo.
-
-* ```./gradlew javadoc``` will generate a set of HTML documents containing documentation on Sinalgo's classes.
-This also includes projects.
-
-## Tutorial
-
-Sinalgo's original tutorial has been reconstructed [in the GitHub Pages for this repository](https://sinalgo.github.io). 
+Sinalgo's original tutorial has been reconstructed [in the GitHub Pages for this repository](https://sinalgo.github.io).
 While this fork has departed quite a bit from the original,
-most of the things in the tutorial are still valid as for building simulations and the general 
+most of the things in the tutorial are still valid as for building simulations and the general
 usage of Sinalgo.
 
+</details>
